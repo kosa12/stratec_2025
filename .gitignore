@@ -1,3 +1,5 @@
 *.zip
 *.pdf
 todo.md
+
+src/__pycache__/
