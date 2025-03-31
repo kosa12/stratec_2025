@@ -53,3 +53,18 @@ def display_stage_five_results(start, dest, t_optimal_days, params, orbit_data):
     display_travel_parameters(params)
     positions = compute_angular_positions(orbit_data, t_optimal_days)
     display_angular_positions(positions, t_optimal_days)
+
+def display_stage_six_results(start, dest, t_optimal_days, params, orbit_data):
+    """Display Stage Six results including travel parameters and dynamic transfer window."""
+    from constants import INITIAL_TIME_YEARS, DAYS_PER_YEAR
+    if t_optimal_days is None:
+        print(f"\nNo optimal transfer window found between {start} and {dest} within 10 years with dynamic motion.")
+        return
+    
+    wait_days = t_optimal_days - (INITIAL_TIME_YEARS * DAYS_PER_YEAR)
+    wait_years = wait_days / DAYS_PER_YEAR
+    print(f"\nOptimal Transfer Window from {start} to {dest} (Stage Six - Dynamic):")
+    print(f"Start time: {INITIAL_TIME_YEARS} years + {wait_years:.2f} years ({wait_days:.1f} days)")
+    display_travel_parameters(params)
+    positions = compute_angular_positions(orbit_data, t_optimal_days)
+    display_angular_positions(positions, t_optimal_days)

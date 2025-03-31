@@ -1,78 +1,45 @@
 from file_operations import read_rocket_data, read_planetary_data, read_solar_system_data
-from calculations import compute_stage_two_data, compute_travel_parameters, compute_angular_positions, compute_optimal_transfer_window
-from display import display_stage_two_results, display_travel_parameters, display_angular_positions, display_stage_five_results
+from calculations import compute_stage_two_data, compute_travel_parameters, compute_angular_positions, compute_optimal_transfer_window, compute_dynamic_transfer_window, compute_rocket_trajectory
+from display import display_stage_two_results, display_travel_parameters, display_angular_positions, display_stage_five_results, display_stage_six_results
+import io
+import sys
 
-def main():
-    print("Planetary Travel Calculator - Stages Two, Three, Four, and Five")
-    print("===============================================================")
+def capture_output(func, *args):
+    """Capture print output as a string for GUI display."""
+    old_stdout = sys.stdout
+    sys.stdout = buffer = io.StringIO()
+    func(*args)
+    sys.stdout = old_stdout
+    return buffer.getvalue()
 
-    # Load data
-    a = read_rocket_data("../Rocket_Data.txt")
-    if a is None:
-        return
-
-    planet_data = read_planetary_data("../Planetary_Data.txt")
-    if not planet_data:
-        return
-
-    orbit_data = read_solar_system_data("../Solar_System_Data.txt")
-    if not orbit_data:
-        return
-
-    # Stage Two
+def run_stage_two(planet_data, a):
+    """Compute and return Stage Two results as a string."""
     stage_two_results = compute_stage_two_data(planet_data, a)
-    display_stage_two_results(stage_two_results)
+    return capture_output(display_stage_two_results, stage_two_results)
 
-    # Stage Three
-    while True:
-        start = input("\nEnter starting planet (or 'q' to quit): ").strip()
-        if start.lower() == 'q':
-            break
-        dest = input("Enter destination planet: ").strip()
-        if dest.lower() == 'q':
-            break
-        if start not in planet_data or dest not in planet_data or start not in orbit_data or dest not in orbit_data:
-            print(">> Error: Invalid planet name(s).")
-            print(">> Choose from:", list(planet_data.keys()))
-            continue
-        
-        params = compute_travel_parameters(start, dest, planet_data, orbit_data, a)
-        display_travel_parameters(params)
+def run_stage_three(start, dest, planet_data, orbit_data, a):
+    """Compute and return Stage Three travel parameters as a string."""
+    params = compute_travel_parameters(start, dest, planet_data, orbit_data, a)
+    return capture_output(display_travel_parameters, params)
 
-    # Stage Four
-    while True:
-        try:
-            t_days_input = input("\nEnter time in days to compute planetary positions (or 'q' to quit): ").strip()
-            if t_days_input.lower() == 'q':
-                break
-            t_days = float(t_days_input)
-            if t_days < 0:
-                print(">> Error: Time must be non-negative.")
-                continue
-            positions = compute_angular_positions(orbit_data, t_days)
-            display_angular_positions(positions, t_days)
-            break
-        except ValueError:
-            print(">> Error: Please enter a valid number of days.")
+def run_stage_four(orbit_data, t_days):
+    """Compute and return Stage Four angular positions as a string."""
+    positions = compute_angular_positions(orbit_data, t_days)
+    return capture_output(display_angular_positions, positions, t_days)
 
-    # Stage Five
-    while True:
-        start = input("\nEnter starting planet for optimal transfer (or 'q' to quit): ").strip()
-        if start.lower() == 'q':
-            print("Goodbye!")
-            break
-        dest = input("Enter destination planet: ").strip()
-        if dest.lower() == 'q':
-            print("Goodbye!")
-            break
-        if start not in planet_data or dest not in planet_data or start not in orbit_data or dest not in orbit_data:
-            print(">> Error: Invalid planet name(s).")
-            print(">> Choose from:", list(planet_data.keys()))
-            continue
-        
-        t_optimal_days, params = compute_optimal_transfer_window(start, dest, planet_data, orbit_data, a)
-        display_stage_five_results(start, dest, t_optimal_days, params, orbit_data)
-        break
+def run_stage_five(start, dest, planet_data, orbit_data, a):
+    """Compute and return Stage Five optimal transfer window as a string."""
+    t_optimal_days, params = compute_optimal_transfer_window(start, dest, planet_data, orbit_data, a)
+    return capture_output(display_stage_five_results, start, dest, t_optimal_days, params, orbit_data)
+
+def run_stage_six(start, dest, planet_data, orbit_data, a):
+    """Compute and return Stage Six dynamic transfer window and trajectory data."""
+    t_optimal_days, params = compute_dynamic_transfer_window(start, dest, planet_data, orbit_data, a)
+    text_output = capture_output(display_stage_six_results, start, dest, t_optimal_days, params, orbit_data)
+    if t_optimal_days is None:
+        return text_output, None, None, None, None
+    trajectory, all_positions, t_start, t_end = compute_rocket_trajectory(start, dest, planet_data, orbit_data, a, t_optimal_days)
+    return text_output, trajectory, all_positions, t_start, t_end
 
 if __name__ == "__main__":
-    main()
+    print("This module is intended to be imported by gui.py. Please run gui.py to launch the application.")
