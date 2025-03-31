@@ -1,5 +1,5 @@
 import math
-from constants import G, EARTH_MASS
+from constants import G, EARTH_MASS, AU_TO_M
 
 def calculate_escape_velocity(mass_kg, radius_m):
     """Calculate escape velocity in m/s given mass in kg and radius in m."""
@@ -34,10 +34,8 @@ def compute_stage_two_data(planet_data, a):
 
 def compute_travel_parameters(start, dest, planet_data, orbit_data, a):
     """Compute travel parameters from start to dest planet (Stage Three)."""
-    from constants import AU_TO_M
-
-    r_orbit_start = orbit_data[start] * AU_TO_M
-    r_orbit_dest = orbit_data[dest] * AU_TO_M
+    r_orbit_start = orbit_data[start][1] * AU_TO_M
+    r_orbit_dest = orbit_data[dest][1] * AU_TO_M
     D_m = abs(r_orbit_dest - r_orbit_start)
 
     r_start_m = planet_data[start][0] * 1000
@@ -59,3 +57,12 @@ def compute_travel_parameters(start, dest, planet_data, orbit_data, a):
     t_total_s = t_acc_s + t_cruise_s + t_dec_s
 
     return t_acc_s, h_acc_m, t_cruise_s, h_dec_m, t_dec_s, t_total_s
+
+def compute_angular_positions(orbit_data, t_days):
+    """Compute angular positions in degrees for all planets at time t_days."""
+    positions = {}
+    for planet, (period_days, _) in orbit_data.items():
+        omega = 360.0 / period_days
+        angle = (omega * t_days) % 360
+        positions[planet] = angle
+    return positions

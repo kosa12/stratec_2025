@@ -26,3 +26,13 @@ def display_travel_parameters(params):
     minutes = int(rem // 60)
     seconds = rem % 60
     print(f"Which is {days} days, {hours} hours, {minutes} minutes, {seconds:.1f} seconds")
+
+def display_angular_positions(positions, t_days):
+    """Display angular positions of planets at time t_days."""
+    print(f"\nPlanetary Positions at t = {t_days} days:")
+    print("-" * 50)
+    print(f"{'Planet':<15} {'Angular Position (degrees)':>30}")
+    print("-" * 50)
+    for planet in sorted(positions):
+        angle = positions[planet]
+        print(f"{planet:<15} {angle:>30.2f}")

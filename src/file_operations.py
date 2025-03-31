@@ -44,22 +44,21 @@ def read_planetary_data(file_path):
     return planet_data
 
 def read_solar_system_data(file_path):
-    """Read solar system data and return {planet: r_orbit_AU}."""
+    """Read solar system data and return {planet: (period_days, r_orbit_AU)}."""
     orbit_data = {}
     if not os.path.exists(file_path):
         print(f">> Error: '{file_path}' not found!")
         return orbit_data
-    
     try:
         with open(file_path, 'r') as file:
             for line in file:
                 if not line.strip():
                     continue
-                match = re.match(r'(\w+):\s*period\s*=\s*[\d.]+\s*days,\s*orbital radius\s*=\s*([\d.]+)\s*AU', line.strip())
+                match = re.match(r'(\w+):\s*period\s*=\s*([\d.]+)\s*days,\s*orbital radius\s*=\s*([\d.]+)\s*AU', line.strip())
                 if match:
-                    planet, r_orbit_str = match.groups()
-                    orbit_data[planet] = float(r_orbit_str)
+                    planet, period_str, r_orbit_str = match.groups()
+                    orbit_data[planet] = (float(period_str), float(r_orbit_str))
     except IOError as e:
         print(f">> Error: Unable to read '{file_path}': {str(e)}")
-        return None
+        return orbit_data
     return orbit_data
