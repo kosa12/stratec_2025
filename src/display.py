@@ -1,3 +1,5 @@
+from calculations import compute_angular_positions
+
 def display_stage_two_results(results):
     """Display Stage Two results in a formatted table."""
     print("\nPlanetary Escape Data:")
@@ -36,3 +38,18 @@ def display_angular_positions(positions, t_days):
     for planet in sorted(positions):
         angle = positions[planet]
         print(f"{planet:<15} {angle:>30.2f}")
+
+def display_stage_five_results(start, dest, t_optimal_days, params, orbit_data):
+    """Display Stage Five results including travel parameters and transfer window."""
+    from constants import INITIAL_TIME_YEARS, DAYS_PER_YEAR
+    if t_optimal_days is None:
+        print(f"\nNo optimal transfer window found between {start} and {dest} within 10 years.")
+        return
+    
+    wait_days = t_optimal_days - (INITIAL_TIME_YEARS * DAYS_PER_YEAR)
+    wait_years = wait_days / DAYS_PER_YEAR
+    print(f"\nOptimal Transfer Window from {start} to {dest}:")
+    print(f"Start time: {INITIAL_TIME_YEARS} years + {wait_years:.2f} years ({wait_days:.1f} days)")
+    display_travel_parameters(params)
+    positions = compute_angular_positions(orbit_data, t_optimal_days)
+    display_angular_positions(positions, t_optimal_days)
